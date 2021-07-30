@@ -1,0 +1,1 @@
+Make sure "Single startup project" under Solution properties -> Startup Project is set to "VRPN-OpenVR" or the solution will run the wrong project.
