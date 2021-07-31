@@ -46,6 +46,7 @@ public:
 private:
 	std::unique_ptr<vr::IVRSystem> vr{ nullptr };
 	vrpn_Connection *connection;
+	std::map<vr::TrackedDeviceIndex_t, std::unique_ptr<vrpn_Tracker_OpenVR>> trackers{};
 	std::map<vr::TrackedDeviceIndex_t, std::unique_ptr<vrpn_Tracker_OpenVR_HMD>> hmds{};
 	std::map<vr::TrackedDeviceIndex_t, std::unique_ptr<vrpn_Tracker_OpenVR_Controller>> controllers{};
 };

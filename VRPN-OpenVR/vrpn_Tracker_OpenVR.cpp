@@ -4,7 +4,7 @@
 #include <iostream>
 
 vrpn_Tracker_OpenVR::vrpn_Tracker_OpenVR(const std::string& name, vrpn_Connection* connection, vr::IVRSystem * vr) :
-	vrpn_Tracker(name.c_str(), connection), name(name), vr(vr)
+	vrpn_Tracker(name.c_str(), connection), name(name), vr(vr), tracker_line_info(name)
 {
 	// Initialize the vrpn_Tracker
     // We track each device separately so this will only ever have one sensor
@@ -15,40 +15,33 @@ void vrpn_Tracker_OpenVR::updateTracking(vr::TrackedDevicePose_t *pose) {
 	if (!pose->bPoseIsValid) {
 		return;
 	}
-	if (pose->eTrackingResult != vr::TrackingResult_Running_OK) {
-		switch (pose->eTrackingResult) {
-		case vr::TrackingResult_Uninitialized:
-			std::cerr << "[" << name << "] Uninitialized" << std::endl;
-		break;
-		case vr::TrackingResult_Calibrating_InProgress:
-			std::cerr << "[" << name << "] Calibrating (In Progress)" << std::endl;
-		break;
-		case vr::TrackingResult_Calibrating_OutOfRange:
-			std::cerr << "[" << name << "] Calibrating (Out of Range)" << std::endl;
-		break;
-		case vr::TrackingResult_Running_OK:
-			std::cerr << "[" << name << "] Running (OK)" << std::endl;
-		break;
-		case vr::TrackingResult_Running_OutOfRange:
-			std::cerr << "[" << name << "] Running (Out of Range)" << std::endl;
-		break;
-		default:
-			std::cerr << "[" << name << "] Unknown tracking result" << std::endl;
-		break;
-		}
-	}
+
+	tracker_line_info.update_status_and_print(pose->eTrackingResult);
 
 	// Sensor, doesn't change since we are tracking individual devices
 	d_sensor = 0;
 
-	// Position
-	pos[0] = pose->mDeviceToAbsoluteTracking.m[0][3];
-	pos[1] = pose->mDeviceToAbsoluteTracking.m[1][3];
-	pos[2] = pose->mDeviceToAbsoluteTracking.m[2][3];
+	// Position OLD
+	//pos[0] = pose->mDeviceToAbsoluteTracking.m[0][3];
+	//pos[1] = pose->mDeviceToAbsoluteTracking.m[1][3];
+	//pos[2] = pose->mDeviceToAbsoluteTracking.m[2][3];
+
+	// Position NEW: UE4 uses different axis so we need to convert
+	pos[0] = -(pose->mDeviceToAbsoluteTracking.m[2][3]);
+	pos[1] = pose->mDeviceToAbsoluteTracking.m[0][3];
+	pos[2] = pose->mDeviceToAbsoluteTracking.m[1][3];
 
 	// Quaternion
 	ConvertSteamVRMatrixToQMatrix(pose->mDeviceToAbsoluteTracking, matrix);
 	q_from_col_matrix(d_quat, matrix);
+
+	// Rotation adjustment: UE4 uses different axis so we need to convert
+	vrpn_float64 temp = d_quat[1];
+	d_quat[1] = d_quat[0];
+	d_quat[0] = temp;
+	temp = d_quat[2];
+	d_quat[2] = d_quat[0];
+	d_quat[0] = -temp;
 
     // Pack message
 	vrpn_gettimeofday(&timestamp, NULL);

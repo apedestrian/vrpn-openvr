@@ -4,6 +4,7 @@
 #include <openvr.h>
 #include <vrpn_Tracker.h>
 #include <quat.h>
+#include "tracker_info_line.h"
 
 class vrpn_Tracker_OpenVR :
 	public vrpn_Tracker
@@ -17,6 +18,7 @@ protected:
 private:
 	std::string name;
 	q_matrix_type matrix;
+	tracker_info_line tracker_line_info;
 	static void ConvertSteamVRMatrixToQMatrix(const vr::HmdMatrix34_t &matPose, q_matrix_type &matrix);
 };
 

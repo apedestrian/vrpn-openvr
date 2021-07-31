@@ -120,12 +120,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="tracker_info_line.cpp" />
     <ClCompile Include="vrpn_Server_OpenVR.cpp" />
     <ClCompile Include="vrpn_Tracker_OpenVR.cpp" />
     <ClCompile Include="vrpn_Tracker_OpenVR_Controller.cpp" />
     <ClCompile Include="vrpn_Tracker_OpenVR_HMD.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="tracker_info_line.h" />
     <ClInclude Include="vrpn_Server_OpenVR.h" />
     <ClInclude Include="vrpn_Tracker_OpenVR.h" />
     <ClInclude Include="vrpn_Tracker_OpenVR_Controller.h" />

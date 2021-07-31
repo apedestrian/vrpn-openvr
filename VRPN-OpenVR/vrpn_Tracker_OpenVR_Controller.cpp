@@ -33,7 +33,7 @@ void vrpn_Tracker_OpenVR_Controller::mainloop() {
 void vrpn_Tracker_OpenVR_Controller::updateController(vr::TrackedDeviceIndex_t unTrackedDevice) {
 	// Analog & Buttons
 	if (vr->GetTrackedDeviceClass(unTrackedDevice) == vr::TrackedDeviceClass_Controller) {
-		vr->GetControllerState(unTrackedDevice, &pControllerState);
+		vr->GetControllerState(unTrackedDevice, &pControllerState);//, sizeof(vr::VRControllerState_t)); // needed in some versions of vrpn api
 
 		for (unsigned int buttonId = 0; buttonId < vr::k_EButton_Max; ++buttonId) {
 			uint64_t mask = vr::ButtonMaskFromId(static_cast<vr::EVRButtonId>(buttonId));
