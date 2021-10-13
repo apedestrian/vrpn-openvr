@@ -35,13 +35,16 @@ void vrpn_Tracker_OpenVR::updateTracking(vr::TrackedDevicePose_t *pose) {
 	ConvertSteamVRMatrixToQMatrix(pose->mDeviceToAbsoluteTracking, matrix);
 	q_from_col_matrix(d_quat, matrix);
 
+
 	// Rotation adjustment: UE4 uses different axis so we need to convert
-	vrpn_float64 temp = d_quat[1];
-	d_quat[1] = d_quat[0];
-	d_quat[0] = temp;
-	temp = d_quat[2];
-	d_quat[2] = d_quat[0];
-	d_quat[0] = -temp;
+	vrpn_float64 temp = -d_quat[2];
+	d_quat[2] = d_quat[1];
+	d_quat[1] = temp;
+
+	temp = d_quat[0];
+	d_quat[0] = d_quat[1];
+	d_quat[1] = temp;
+
 
     // Pack message
 	vrpn_gettimeofday(&timestamp, NULL);

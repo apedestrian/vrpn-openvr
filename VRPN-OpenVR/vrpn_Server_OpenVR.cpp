@@ -13,7 +13,7 @@ vrpn_Server_OpenVR::vrpn_Server_OpenVR() {
         vr.reset(nullptr);
         std::cerr << "Unable to init VR runtime: " << vr::VR_GetVRInitErrorAsEnglishDescription(eError) << std::endl;
     }
-
+    
     // Initialize VRPN Connection
     std::string connectionName = ":" + std::to_string(vrpn_DEFAULT_LISTEN_PORT_NO);
     connection = vrpn_create_server_connection(connectionName.c_str());
@@ -47,12 +47,13 @@ void vrpn_Server_OpenVR::mainloop() {
 
         // Treat different device types separately
         auto device_class = vr->GetTrackedDeviceClass(unTrackedDevice);
+        static auto addresss = "@127.0.0.1:" + std::to_string(vrpn_DEFAULT_LISTEN_PORT_NO);
         switch (device_class) {
             case vr::TrackedDeviceClass_HMD: {
                 vrpn_Tracker_OpenVR_HMD *hmd{nullptr};
                 auto search = hmds.find(unTrackedDevice);
                 if (search == hmds.end()) {
-                    auto name = "openvr/hmd/" + std::to_string(unTrackedDevice);
+                    auto name = "openvr/hmd/" + std::to_string(unTrackedDevice) + addresss;
                     std::unique_ptr<vrpn_Tracker_OpenVR_HMD> newHMD = std::make_unique<vrpn_Tracker_OpenVR_HMD>(
                         name,
                         connection,
@@ -71,7 +72,7 @@ void vrpn_Server_OpenVR::mainloop() {
                 vrpn_Tracker_OpenVR_Controller *controller{nullptr};
                 auto search = controllers.find(unTrackedDevice);
                 if (search == controllers.end()) {
-                    auto name = "openvr/controller/" + std::to_string(unTrackedDevice);
+                    auto name = "openvr/controller/" + std::to_string(unTrackedDevice) + addresss;
                     std::unique_ptr<vrpn_Tracker_OpenVR_Controller> newController = std::make_unique<vrpn_Tracker_OpenVR_Controller>(
                         name,
                         connection,
@@ -87,11 +88,15 @@ void vrpn_Server_OpenVR::mainloop() {
                 controller->mainloop();
                 break;
             }
-            case vr::TrackedDeviceClass_Other: {//TrackedDeviceClass_GenericTracker
+            case vr::TrackedDeviceClass_TrackingReference: { // Basestation; do nothing
+                break;
+            }
+            //case vr::TrackedDeviceClass_Other: {//TrackedDeviceClass_GenericTracker
+            default: {
                 vrpn_Tracker_OpenVR* tracker{ nullptr };
                 auto search = trackers.find(unTrackedDevice);
                 if (search == trackers.end()) {
-                    auto name = "openvr/tracker/" + std::to_string(unTrackedDevice);
+                    auto name = "openvr/other/" + std::to_string(unTrackedDevice) + addresss;
                     std::unique_ptr<vrpn_Tracker_OpenVR> newTracker = std::make_unique<vrpn_Tracker_OpenVR>(
                         name,
                         connection,
@@ -107,14 +112,14 @@ void vrpn_Server_OpenVR::mainloop() {
                 tracker->mainloop();
                 break;
             }
-            default: {
-                static std::set<vr::TrackedDeviceIndex_t> reported;
-                if (reported.count(device_class) == 0) {
-                    std::cout << "Unkown TrackedDeviceClass id: " << vr->GetTrackedDeviceClass(unTrackedDevice) << std::endl;
-                    reported.insert(device_class);
-                }
-                break;
-            }
+            //default: {
+            //    static std::set<vr::TrackedDeviceIndex_t> reported;
+            //    if (reported.count(device_class) == 0) {
+            //        std::cout << "Unkown TrackedDeviceClass id: " << vr->GetTrackedDeviceClass(unTrackedDevice) << std::endl;
+            //        reported.insert(device_class);
+            //    }
+            //    break;
+            //}
         }
     }
 
